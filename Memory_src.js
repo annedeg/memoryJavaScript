@@ -39,6 +39,7 @@ function initVars(size) {
     // Initialiseer alle benodigde variabelen en de velden op het scherm
     // moet een karakter toegewezen worden. Hiervoor kan de nextletter functie
     setStartTime();
+    done = false;
     numberOfCards = size * size;
     numberOfCardsLeft = numberOfCards
     karakter = $('#character').children("option:selected").val();
@@ -103,9 +104,9 @@ var nextLetter = function (size) {
 }
 
 function cardClicked(cardNumber) {
-    if(!started) {
-        started = true;
-    }
+        if(!started) {
+            started = true;
+        }
     let card = board[cardNumber]
 
     if (!(card === firstCard || card === secondCard)) {
@@ -125,7 +126,7 @@ function cardClicked(cardNumber) {
 }
 
 function updateTimeLeft(first = false) {
-    if (!secondCard) {
+    if (!secondCard && done !== true) {
         let date = new Date();
         if (first) {
             setTijden();
@@ -135,21 +136,22 @@ function updateTimeLeft(first = false) {
         let widthTimeLeft = ((5 - (currentTime - cardStartTime)) * (185 / 5));
         $('#timeLeft').css('width', widthTimeLeft);
         if (widthTimeLeft < 0) {
-            console.log("we fucked up")
             if(firstCard) {
                 toggleCard(firstCard);
                 updateCard(firstCard[3]);
+                firstCard = null;
                 resetTimeLeft();
+                console.log(firstCard + "first")
+                console.log(secondCard + "second")
             }
             return
         }
-        console.log(firstCard)
-        if(!firstCard) {
-            // 2 the same cards found
-            resetTimeLeft();
-            console.log("found last")
-            return
-        }
+        // if(!firstCard) {
+        //     // 2 the same cards found
+        //     resetTimeLeft();
+        //     console.log("found last")
+        //     return
+        // }
         setTimeout(updateTimeLeft, 100)
 
     } else {
@@ -223,7 +225,9 @@ function checkKaarten() {
     // zijn nu found.
     // Als de kaarten niet gelijk zijn moet de timer gaan lopen van de toontijd, en
     // de timeleft geanimeerd worden zodat deze laat zien hoeveel tijd er nog is.
-    if (firstCard[1] === secondCard[1]) {
+    if (firstCard[1] === secondCard[1] && firstCard != null) {
+        console.log(firstCard)
+        console.log(secondCard)
         numberOfCardsLeft -= 2;
         //selecteer somehow de gevonden kaarten en wissel ze van kleur
         //haal ook de setonclick actie weg????
@@ -242,10 +246,12 @@ function checkKaarten() {
 // De functie tijdBijhouden moet elke halve seconde uitgevoerd worden om te controleren of 
 // het spel klaar is en de informatie op het scherm te verversen.
 function tijdBijhouden() {
-    if (numberOfCardsLeft === 0) {
+    if (numberOfCardsLeft === 0 && gameTime != null) {
         endGame();
         console.log("blah blah blah")
         return
+    } else if(gameTime == null && numberOfCardsLeft === 0 && done === true) {
+
     } else {
         setTijden();
         // Roep hier deze functie over 500 miliseconden opnieuw aan
@@ -260,7 +266,6 @@ function endGame() {
     done = true;
     updateTopScores(gameTime)
     gameTime = null
-
 }
 
 function updateTopScores(speelTijd) {
@@ -295,10 +300,14 @@ function shuffle(array) {
 }
 
 function updateCard(cardNumber) {
+    //let card = document.getElementById('card-' + cardNumber);
     let card = $('#card-' + cardNumber);
     switch (board[cardNumber][2]) {
         case 0:
+            //card.style.backgroundColor = '#' + document.getElementById('valueinactive').valueOf();
             card.css("background-color", '#' + $('#valueinactive').val());
+
+            //card.innerText = board[cardNumber][0];
             card.text(board[cardNumber][0]);
             break;
         case 1:
